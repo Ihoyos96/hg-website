@@ -50,9 +50,12 @@ importers:
       tailwind-merge:
         specifier: ^2.5.5
         version: 2.5.5
+      tailwindcss:
+        specifier: ^4.1.9
+        version: 4.1.9
       tailwindcss-animate:
         specifier: ^1.0.7
-        version: 1.0.7
+        version: 1.0.7(tailwindcss@4.1.9)
       vue:
         specifier: latest
         version: 3.5.20(typescript@5.0.2)
@@ -2261,7 +2264,9 @@ snapshots:
 
   tailwind-merge@2.5.5: {}
 
-  tailwindcss-animate@1.0.7: {}
+  tailwindcss-animate@1.0.7(tailwindcss@4.1.9):
+    dependencies:
+      tailwindcss: 4.1.9
 
   tailwindcss@4.1.9: {}
 
