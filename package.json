@@ -1,18 +1,8 @@
 {
-  "name": "hats-group-website",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "lint": "next lint",
-    "start": "next start"
-  },
   "dependencies": {
     "@react-email/render": "latest",
     "@remix-run/react": "latest",
     "@sveltejs/kit": "latest",
-    "@tailwindcss/postcss": "^4.1.9",
     "@vercel/analytics": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -23,7 +13,6 @@
     "resend": "latest",
     "svelte": "latest",
     "tailwind-merge": "^2.5.5",
-    "tailwindcss": "^4.1.9",
     "tailwindcss-animate": "^1.0.7",
     "vue": "latest",
     "vue-router": "latest"

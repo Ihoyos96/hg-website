@@ -20,64 +20,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
     }
 
-    // Convert resume to base64 for attachment
-    let resumeAttachment = null
-    if (resume && resume.size > 0) {
-      const resumeBuffer = await resume.arrayBuffer()
-      const resumeBase64 = Buffer.from(resumeBuffer).toString("base64")
-      resumeAttachment = {
-        filename: resume.name,
-        content: resumeBase64,
-      }
-      console.log("[v0] Resume processed:", resume.name)
+    if (!process.env.RESEND_API_KEY) {
+      console.log("[v0] Missing RESEND_API_KEY")
+      return NextResponse.json({ error: "Email service not configured" }, { status: 500 })
     }
 
-    console.log("[v0] Preparing email...")
-
-    const emailData = {
+    const emailData: any = {
       from: "noreply@hatsgroupllc.com",
       to: ["applications@hatsgroupllc.com"],
+      reply_to: [email], // Use reply_to instead of replyTo and wrap in array
       subject: `Job Application: ${role} - ${name}`,
-      headers: {
-        "Reply-To": email,
-      },
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">New Job Application</h2>
-          
-          <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Position:</strong> ${role}</p>
-            <p><strong>Applicant Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-          </div>
-          
-          <div style="background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; font-size: 14px; color: #666;">
-              <strong>Note:</strong> Reply to this email to respond directly to the applicant at ${email}
-            </p>
-          </div>
-          
-          ${resume ? "<p><strong>Resume:</strong> See attached file</p>" : "<p><em>No resume attached</em></p>"}
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
-          <p style="font-size: 12px; color: #888;">
-            This application was submitted through the Hats Group website.
-          </p>
-        </div>
+        <h2>New Job Application</h2>
+        <p><strong>Position:</strong> ${role}</p>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Resume:</strong> ${resume ? "Attached" : "Not provided"}</p>
       `,
-      ...(resumeAttachment && { attachments: [resumeAttachment] }),
     }
 
-    console.log("[v0] Sending email...")
+    // Add resume attachment if provided
+    if (resume) {
+      const resumeBuffer = await resume.arrayBuffer()
+      const resumeBase64 = Buffer.from(resumeBuffer).toString("base64")
+
+      emailData.attachments = [
+        {
+          filename: resume.name,
+          content: resumeBase64,
+        },
+      ]
+    }
+
+    console.log("[v0] Sending email with data:", {
+      from: emailData.from,
+      to: emailData.to,
+      reply_to: emailData.reply_to,
+      subject: emailData.subject,
+    })
+
     const result = await resend.emails.send(emailData)
+
     console.log("[v0] Email sent successfully:", result)
 
     return NextResponse.json({ success: true, data: result })
   } catch (error) {
     console.error("[v0] Error sending email:", error)
-    return NextResponse.json(
-      { error: "Failed to send application", details: error instanceof Error ? error.message : "Unknown error" },
-      { status: 500 },
-    )
+    return NextResponse.json({ error: "Failed to send email" }, { status: 500 })
   }
 }
